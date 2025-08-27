@@ -1,0 +1,196 @@
+{
+  "name": "GetAvailability",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "94e2842e-9019-45e6-8060-e934f94323b4",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "6761ea24-fc12-4f2a-b59e-3f23e651b23d",
+      "name": "Webhook",
+      "webhookId": "94e2842e-9019-45e6-8060-e934f94323b4"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dateTime",
+      "typeVersion": 2,
+      "position": [
+        208,
+        0
+      ],
+      "id": "92acbbff-c671-433a-91f8-6724ebc33943",
+      "name": "Date & Time"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Current Date and Time:\n{{ $json.currentDate }}\n\nCalendar Availability Data:\n\nRequested Date: (drag the date from webhook here)\n\nRequested Time: (drag the time from webhook here)\n\nWorking hours:\nBuffer time:\nDuration of each slot:\n\nProcessing Steps:\nCheck if the time is available for the requested date.\nIf available, confirm the booking and inform the AI.\nIf unavailable due to a conflict: suggest up to 3 closest available slots while ensuring buffer time.\nIf no slots are available on that day, find the next available weekday and provide alternative slots.\n\nOutput Requirements:\n\n✅ If the requested time is available, confirm it:\nExample: “The requested time of 2:00pm on August 27th, 2025, is available. Would you like to proceed with this booking?”\n\n✅ ONLY if unavailable, suggest up to 3 alternative slots\n\n✅ If no slots exist, suggest the next open weekday.\n\nYour output should not sound robotic (example: We have availability on (insert date))",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        416,
+        0
+      ],
+      "id": "7a7f46ee-cc83-4e23-836c-3d1566463256",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        768,
+        0
+      ],
+      "id": "0eb10d11-6c1b-4aff-97de-ba506b887d07",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        320,
+        224
+      ],
+      "id": "0f40833b-ee66-4aed-b749-5ae8eff43093",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "PgyaQi1ppuqDfHgO",
+          "name": "Udo API"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.toolThink",
+      "typeVersion": 1.1,
+      "position": [
+        688,
+        224
+      ],
+      "id": "4e858abd-eab9-4e25-b989-4cfcbcfdd521",
+      "name": "Think"
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "calendar": {
+          "__rl": true,
+          "mode": "list",
+          "value": ""
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.3,
+      "position": [
+        560,
+        208
+      ],
+      "id": "3cc74fbf-b023-4b4e-9d0c-683850153e3c",
+      "name": "Get many events in Google Calendar"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Date & Time",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Date & Time": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Think": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get many events in Google Calendar": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "f1007d07-bbb2-4397-b316-2ae5b4df2625",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "0198691b786ad8b23d6ef796e3f23dd6c1f7db5cf754bbe74e3869a0cbccab7d"
+  },
+  "id": "S6LXz6uUBPs8qIsn",
+  "tags": []
+}
